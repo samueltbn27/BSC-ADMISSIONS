@@ -1,0 +1,38 @@
+name: Database integrity
+on:
+  push:
+    branches: [feature/database-husni]
+  pull_request:
+    paths:
+      - database/**
+      - scripts/**
+      - tests/**
+      - .github/workflows/database.yml
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          # Disposable CI service only. Never copy this auth policy to deployment.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - run: make check
+      - run: make test
