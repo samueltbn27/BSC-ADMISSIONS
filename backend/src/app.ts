@@ -24,6 +24,18 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '100kb' }));
 
+if (process.env.DEBUG_REQUESTS === '1') {
+  let count = 0;
+  app.use((req, _res, next) => {
+    count += 1;
+    if (count % 50 === 0) {
+      // eslint-disable-next-line no-console
+      console.log(`[req-debug] ${count} requests so far (last: ${req.method} ${req.path})`);
+    }
+    next();
+  });
+}
+
 const noop = (_req: express.Request, _res: express.Response, next: express.NextFunction) => next();
 
 const globalLimiter =
