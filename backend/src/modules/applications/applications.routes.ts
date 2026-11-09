@@ -63,6 +63,15 @@ applicationRoutes.get(
     const offset = Number(req.query.offset ?? 0);
 
     let rows = await selectFn('list_applicants', [req.user!.id, q ?? null, limit, offset]);
+    rows = rows.map((r) => ({
+      user_id: r.user_id,
+      full_name: r.full_name,
+      phone: r.phone,
+      application_id: r.application_id,
+      registration_number: r.reg_no,
+      status: r.st,
+      created_at: r.created_at,
+    }));
     if (status) {
       rows = rows.filter((r) => r.status === status);
     }

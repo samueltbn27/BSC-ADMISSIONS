@@ -31,13 +31,23 @@ dashboardRoutes.get(
   requireAuth,
   requireRole('committee', 'admin'),
   asyncHandler(async (req: AuthedRequest, res) => {
-    const [catalog, applicants] = await Promise.all([
+    const [catalog, rawApplicants] = await Promise.all([
       callFn('get_catalog'),
       selectFn('list_applicants', [req.user!.id, null, 100, 0]),
     ]);
+    const applicants = rawApplicants.map((a: any) => ({
+      user_id: a.user_id,
+      full_name: a.full_name,
+      phone: a.phone,
+      application_id: a.application_id,
+      registration_number: a.reg_no,
+      status: a.st,
+      created_at: a.created_at,
+    }));
     const counts: Record<string, number> = {};
     for (const a of applicants) {
-      counts[a.status] = (counts[a.status] ?? 0) + 1;
+      const key = a.status ?? 'belum_ada_aplikasi';
+      counts[key] = (counts[key] ?? 0) + 1;
     }
     ok(res, {
       counts,
@@ -53,16 +63,24 @@ dashboardRoutes.get(
   requireAuth,
   requireRole('admin'),
   asyncHandler(async (req: AuthedRequest, res) => {
-    const [users, applicants, periods, announcements] = await Promise.all([
+    const [users, rawApplicants, periods, announcements] = await Promise.all([
       selectFn('list_users', [req.user!.id, null, 100, 0]),
       selectFn('list_applicants', [req.user!.id, null, 100, 0]),
       callFn('list_periods', [req.user!.id]),
       callFn('list_announcements', [req.user!.id]),
     ]);
+    const applicants = rawApplicants.map((a: any) => ({
+      ...a,
+      registration_number: a.reg_no,
+      status: a.st,
+    }));
     const roleCounts: Record<string, number> = {};
     for (const u of users) roleCounts[u.role_code] = (roleCounts[u.role_code] ?? 0) + 1;
     const statusCounts: Record<string, number> = {};
-    for (const a of applicants) statusCounts[a.status] = (statusCounts[a.status] ?? 0) + 1;
+    for (const a of applicants) {
+      const key = a.status ?? 'belum_ada_aplikasi';
+      statusCounts[key] = (statusCounts[key] ?? 0) + 1;
+    }
     ok(res, {
       roleCounts,
       statusCounts,

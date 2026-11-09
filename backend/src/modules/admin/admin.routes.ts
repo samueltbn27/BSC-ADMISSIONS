@@ -124,7 +124,16 @@ adminRoutes.get('/pendaftar', asyncHandler(async (req: AuthedRequest, res) => {
   const q = typeof req.query.q === 'string' ? req.query.q.trim() : null;
   const limit = Number(req.query.limit ?? 50);
   const offset = Number(req.query.offset ?? 0);
-  const applicants = await selectFn('list_applicants', [req.user!.id, q, limit, offset]);
+  const rows = await selectFn('list_applicants', [req.user!.id, q, limit, offset]);
+  const applicants = rows.map((r: any) => ({
+    user_id: r.user_id,
+    full_name: r.full_name,
+    phone: r.phone,
+    application_id: r.application_id,
+    registration_number: r.reg_no,
+    status: r.st,
+    created_at: r.created_at,
+  }));
   ok(res, { applicants, total: applicants.length });
 }));
 

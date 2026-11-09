@@ -201,7 +201,7 @@ $$;
 CREATE FUNCTION bsc_api.list_applicants(p_actor uuid, p_search text DEFAULT NULL,
     p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)
 RETURNS TABLE (user_id uuid, full_name text, phone text, application_id uuid,
-    registration_number text, status text, created_at timestamptz)
+    reg_no text, st text, created_at timestamptz)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, bsc, pg_temp AS $$
 BEGIN
     IF bsc._role(p_actor) NOT IN ('committee', 'admin') THEN
@@ -214,8 +214,10 @@ BEGIN
         a.id, a.registration_number, a.status, p.created_at
         FROM bsc.applicant_profiles p
         LEFT JOIN LATERAL (
-            SELECT id, registration_number, status FROM bsc.applications
-            WHERE applicant_profile_id = p.id ORDER BY created_at DESC, id LIMIT 1
+            SELECT ap.id, ap.registration_number, ap.status
+            FROM bsc.applications ap
+            WHERE ap.applicant_profile_id = p.id
+            ORDER BY ap.created_at DESC, ap.id LIMIT 1
         ) a ON true
         WHERE (p_search IS NULL OR p.full_name ILIKE '%' || p_search || '%'
             OR a.registration_number ILIKE '%' || p_search || '%')
