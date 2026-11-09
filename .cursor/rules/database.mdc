@@ -1,0 +1,18 @@
+---
+description: Kontrak database BSC Admissions (skema dan fungsi)
+globs: ["database/**", "backend/src/db/**"]
+alwaysApply: false
+---
+
+# Kontrak Database
+
+- Skema bisnis: `bsc` (tabel hanya dibaca via fungsi; runtime tidak punya akses tabel langsung).
+- Skema fungsi: `bsc_api` (runtime) dan `bsc_auth` (hanya `lookup_account` untuk auth).
+- Ledger migration: `bsc_meta.migrations` (version + checksum SHA-256). Jangan mengedit file migration
+  yang sudah diterapkan; tambah migration baru.
+- Parameter Argon2id wajib sesuai CHECK `users.password_argon2id`
+  (`m` 19456–1048576, `t` 2–20, `p` 1–16, format PHC v=19).
+- Telepon E.164 (`+...`), email lower/trim unik, gender `L`/`P`.
+- Dokumen: PDF/JPG/PNG, magic bytes diperiksa backend, storage key acak `applications/<uuid>/<uuid>`,
+  penggantian = upload revisi baru (tanpa DELETE slot).
+- Hasil seleksi privat sampai `publish_selection_result` dijalankan (admin).
