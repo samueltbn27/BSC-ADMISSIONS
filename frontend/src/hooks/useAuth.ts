@@ -13,7 +13,9 @@ export function useAuth() {
     queryKey: ['auth', 'me'],
     queryFn: () => api.get<AuthResponse>('/auth/me'),
     retry: false,
-    staleTime: 30_000,
+    staleTime: 60_000,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const setUser = (user: User) => {
