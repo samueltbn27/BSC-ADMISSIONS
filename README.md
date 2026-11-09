@@ -57,6 +57,9 @@ npm install
 npm run dev             # http://localhost:4000
 ```
 
+Versi produksi backend juga **menyajikan build frontend statis** di `http://localhost:4000`
+(satu origin, tanpa proxy) bila `FRONTEND_DIST` diisi — inilah mode yang paling stabil untuk demo.
+
 Test: `npm test` (unit + HTTP dengan mock DB; jalankan `RUN_DB_TESTS=1 npm test`
 untuk mengaktifkan tes integrasi database nyata).
 
@@ -67,10 +70,10 @@ Build produksi: `npm run build && npm start`
 ```sh
 cd frontend
 npm install
-npm run dev             # http://localhost:5173 (proxy /api -> :4000)
+npm run dev             # dev server: http://localhost:5173 (proxy /api -> :4000)
 ```
 
-Build produksi: `npm run build` (output `dist/`)
+Build produksi: `npm run build` (output `dist/` — disajikan backend)
 
 ## Akun demo
 

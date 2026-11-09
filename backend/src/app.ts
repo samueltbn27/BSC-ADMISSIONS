@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import path from 'node:path';
 import { env } from './config/env.js';
 import { csrfGuard } from './middlewares/csrf.js';
 import { errorHandler } from './middlewares/error.js';
@@ -62,6 +63,15 @@ app.use('/api/v1/verifikasi', csrfGuard, verificationRoutes);
 app.use('/api/v1/hasil-seleksi', csrfGuard, selectionRoutes);
 app.use('/api/v1/admin', csrfGuard, adminRoutes);
 app.use('/api/v1/dashboard', csrfGuard, dashboardRoutes);
+
+if (env.FRONTEND_DIST) {
+  const distDir = path.resolve(process.cwd(), env.FRONTEND_DIST);
+  app.use(express.static(distDir));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distDir, 'index.html'));
+  });
+}
 
 app.use((_req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Endpoint tidak ditemukan' } });

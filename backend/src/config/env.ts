@@ -29,6 +29,8 @@ const schema = z.object({
 
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(10),
+
+  FRONTEND_DIST: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);
