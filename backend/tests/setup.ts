@@ -1,5 +1,11 @@
-Object.assign(process.env, {
-  NODE_ENV: 'test',
+import dotenv from 'dotenv';
+import path from 'node:path';
+
+process.env.NODE_ENV = 'test';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+const defaults: Record<string, string> = {
   PORT: '4001',
   PGHOST: '127.0.0.1',
   PGPORT: '5432',
@@ -14,4 +20,10 @@ Object.assign(process.env, {
   UPLOAD_DIR: 'storage/uploads-test',
   UPLOAD_MAX_BYTES: '20971520',
   ALLOWED_ORIGIN: 'http://localhost:5173',
-});
+};
+
+for (const [key, value] of Object.entries(defaults)) {
+  if (process.env[key] === undefined) {
+    process.env[key] = value;
+  }
+}

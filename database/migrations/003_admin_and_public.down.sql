@@ -24,18 +24,13 @@ DROP TABLE bsc.school_announcements;
 DO $$
 DECLARE cname text;
 BEGIN
-    SELECT conname INTO cname FROM pg_constraint
+    FOR cname IN
+        SELECT conname FROM pg_constraint
         WHERE conrelid = 'bsc.audit_logs'::regclass AND contype = 'c'
-          AND pg_get_constraintdef(oid) LIKE '%entity_type IN%';
-    IF cname IS NOT NULL THEN
+          AND pg_get_constraintdef(oid) ~ 'action|entity_type'
+    LOOP
         EXECUTE format('ALTER TABLE bsc.audit_logs DROP CONSTRAINT %I', cname);
-    END IF;
-    SELECT conname INTO cname FROM pg_constraint
-        WHERE conrelid = 'bsc.audit_logs'::regclass AND contype = 'c'
-          AND pg_get_constraintdef(oid) LIKE '%action IN%';
-    IF cname IS NOT NULL THEN
-        EXECUTE format('ALTER TABLE bsc.audit_logs DROP CONSTRAINT %I', cname);
-    END IF;
+    END LOOP;
 END $$;
 ALTER TABLE bsc.audit_logs ADD CONSTRAINT audit_logs_action_check CHECK (
     action IN ('account_created', 'account_updated', 'profile_saved', 'application_created',

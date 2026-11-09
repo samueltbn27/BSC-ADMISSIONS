@@ -10,13 +10,13 @@
 DO $$
 DECLARE cname text;
 BEGIN
-    SELECT conname INTO cname FROM pg_constraint
+    FOR cname IN
+        SELECT conname FROM pg_constraint
         WHERE conrelid = 'bsc.audit_logs'::regclass AND contype = 'c'
-          AND pg_get_constraintdef(oid) LIKE '%action IN%';
-    IF cname IS NULL THEN
-        RAISE EXCEPTION 'audit action check not found';
-    END IF;
-    EXECUTE format('ALTER TABLE bsc.audit_logs DROP CONSTRAINT %I', cname);
+          AND pg_get_constraintdef(oid) ~ 'action|entity_type'
+    LOOP
+        EXECUTE format('ALTER TABLE bsc.audit_logs DROP CONSTRAINT %I', cname);
+    END LOOP;
 END $$;
 ALTER TABLE bsc.audit_logs ADD CONSTRAINT audit_logs_action_check CHECK (
     action IN ('account_created', 'account_updated', 'profile_saved', 'application_created',
@@ -25,17 +25,6 @@ ALTER TABLE bsc.audit_logs ADD CONSTRAINT audit_logs_action_check CHECK (
         'period_created', 'period_updated', 'major_created', 'major_updated',
         'announcement_created', 'announcement_updated', 'announcement_deleted')
 );
-DO $$
-DECLARE cname text;
-BEGIN
-    SELECT conname INTO cname FROM pg_constraint
-        WHERE conrelid = 'bsc.audit_logs'::regclass AND contype = 'c'
-          AND pg_get_constraintdef(oid) LIKE '%entity_type IN%';
-    IF cname IS NULL THEN
-        RAISE EXCEPTION 'audit entity_type check not found';
-    END IF;
-    EXECUTE format('ALTER TABLE bsc.audit_logs DROP CONSTRAINT %I', cname);
-END $$;
 ALTER TABLE bsc.audit_logs ADD CONSTRAINT audit_logs_entity_type_check CHECK (
     entity_type IN ('user', 'profile', 'application', 'document', 'result',
         'period', 'major', 'announcement')
