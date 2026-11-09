@@ -10,7 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { ErrorState, PageHeader } from '@/components/shared/states';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 const empty = { name: '', academic_year: '', opens_at: '', closes_at: '', is_active: false };
 
@@ -38,7 +39,7 @@ export default function AdminPeriode() {
     onError: (err) => toast.error(err.message),
   });
 
-  if (periods.isLoading) return <LoadingState />;
+  if (periods.isLoading) return <TableSkeleton />;
   if (periods.isError) return <ErrorState onRetry={() => periods.refetch()} />;
 
   return (

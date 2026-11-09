@@ -4,7 +4,8 @@ import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import type { AuditLogRow } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { EmptyState, ErrorState, PageHeader } from '@/components/shared/states';
+import { TableSkeleton } from '@/components/shared/skeletons';
 import { Pagination } from '@/components/shared/pagination';
 
 const ACTION_LABEL: Record<string, string> = {
@@ -41,7 +42,7 @@ export default function AdminAuditLog() {
       ),
   });
 
-  if (logs.isLoading) return <LoadingState />;
+  if (logs.isLoading) return <TableSkeleton />;
   if (logs.isError) return <ErrorState onRetry={() => logs.refetch()} />;
 
   return (

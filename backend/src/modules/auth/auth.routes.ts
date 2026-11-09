@@ -3,7 +3,7 @@ import { env } from '../../config/env.js';
 import { sessionStore } from '../../session/store.js';
 import { requireAuth, type AuthedRequest } from '../../middlewares/auth.js';
 import { ApiError, asyncHandler, ok } from '../../utils/http.js';
-import { credentialsSchema, login, register } from './auth.service.js';
+import { changePassword, changePasswordSchema, credentialsSchema, login, register } from './auth.service.js';
 
 export const authRoutes = Router();
 
@@ -44,6 +44,18 @@ authRoutes.post(
     sessionStore.delete(req.user!.sessionId);
     res.clearCookie(env.SESSION_COOKIE_NAME, { httpOnly: true, path: '/' });
     ok(res, { logout: true });
+  })
+);
+
+authRoutes.post(
+  '/change-password',
+  requireAuth,
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const body = changePasswordSchema.parse(req.body);
+    await changePassword(req.user!.email, req.user!.id, body.currentPassword, body.newPassword);
+    sessionStore.deleteAllForUser(req.user!.id);
+    res.clearCookie(env.SESSION_COOKIE_NAME, { httpOnly: true, path: '/' });
+    ok(res, { changed: true, reauthenticate: true });
   })
 );
 

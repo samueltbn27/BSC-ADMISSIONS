@@ -3,7 +3,8 @@ import { api } from '@/lib/api';
 import { STATUS_LABEL } from '@/lib/utils';
 import type { AdminDashboard } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { ErrorState, PageHeader } from '@/components/shared/states';
+import { CardGridSkeleton } from '@/components/shared/skeletons';
 
 export default function AdminDashboard() {
   const dashboard = useQuery({
@@ -11,7 +12,7 @@ export default function AdminDashboard() {
     queryFn: () => api.get<AdminDashboard>('/dashboard/admin'),
   });
 
-  if (dashboard.isLoading) return <LoadingState />;
+  if (dashboard.isLoading) return <CardGridSkeleton cards={4} />;
   if (dashboard.isError) return <ErrorState onRetry={() => dashboard.refetch()} />;
 
   const d = dashboard.data!;

@@ -6,7 +6,8 @@ import { formatDate, STATUS_LABEL } from '@/lib/utils';
 import type { StudentDashboard } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { EmptyState, ErrorState, PageHeader } from '@/components/shared/states';
+import { CardGridSkeleton } from '@/components/shared/skeletons';
 import { StatusBadge } from '@/components/shared/status-badge';
 
 export default function SiswaDashboard() {
@@ -15,7 +16,7 @@ export default function SiswaDashboard() {
     queryFn: () => api.get<StudentDashboard>('/dashboard/siswa'),
   });
 
-  if (dashboard.isLoading) return <LoadingState />;
+  if (dashboard.isLoading) return <CardGridSkeleton cards={3} />;
   if (dashboard.isError) return <ErrorState message="Gagal memuat dashboard" onRetry={() => dashboard.refetch()} />;
 
   const { profile, applications, majors } = dashboard.data!;

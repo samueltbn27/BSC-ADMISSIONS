@@ -6,7 +6,8 @@ import { STATUS_LABEL } from '@/lib/utils';
 import type { StaffDashboard } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { ErrorState, PageHeader } from '@/components/shared/states';
+import { CardGridSkeleton } from '@/components/shared/skeletons';
 
 export default function PanitiaDashboard() {
   const dashboard = useQuery({
@@ -14,7 +15,7 @@ export default function PanitiaDashboard() {
     queryFn: () => api.get<StaffDashboard>('/dashboard/panitia'),
   });
 
-  if (dashboard.isLoading) return <LoadingState />;
+  if (dashboard.isLoading) return <CardGridSkeleton cards={5} />;
   if (dashboard.isError) return <ErrorState onRetry={() => dashboard.refetch()} />;
 
   const { counts, total, recent } = dashboard.data!;

@@ -70,11 +70,13 @@ describe('Keamanan Endpoint', () => {
 
   it('mengizinkan akses panitia ke antrean pendaftaran', async () => {
     m.selectFn.mockResolvedValue([]);
+    m.callFn.mockResolvedValue(0);
     const res = await request(app)
       .get('/api/v1/pendaftaran?limit=10')
       .set(cookieFor('committee'));
     expect(res.status).toBe(200);
-    expect(m.selectFn).toHaveBeenCalledWith('list_applicants', ['u-1', null, 10, 0]);
+    expect(m.selectFn).toHaveBeenCalledWith('list_applicants', ['u-1', null, null, 10, 0]);
+    expect(m.callFn).toHaveBeenCalledWith('count_applicants', ['u-1', null, null]);
   });
 
   it('menolak input tidak valid pada endpoint profil', async () => {

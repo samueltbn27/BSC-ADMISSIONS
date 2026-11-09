@@ -199,7 +199,7 @@ $$;
 
 -- Applicant search for committee/admin (no email exposure; latest application joined).
 CREATE FUNCTION bsc_api.list_applicants(p_actor uuid, p_search text DEFAULT NULL,
-    p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)
+    p_status text DEFAULT NULL, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0)
 RETURNS TABLE (user_id uuid, full_name text, phone text, application_id uuid,
     reg_no text, st text, created_at timestamptz)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, bsc, pg_temp AS $$
@@ -221,7 +221,31 @@ BEGIN
         ) a ON true
         WHERE (p_search IS NULL OR p.full_name ILIKE '%' || p_search || '%'
             OR a.registration_number ILIKE '%' || p_search || '%')
+            AND (p_status IS NULL OR a.status = p_status)
         ORDER BY p.created_at DESC, p.id LIMIT p_limit OFFSET p_offset;
+END;
+$$;
+
+CREATE FUNCTION bsc_api.count_applicants(p_actor uuid, p_search text DEFAULT NULL,
+    p_status text DEFAULT NULL) RETURNS bigint
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, bsc, pg_temp AS $$
+DECLARE total bigint;
+BEGIN
+    IF bsc._role(p_actor) NOT IN ('committee', 'admin') THEN
+        RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'Access denied';
+    END IF;
+    SELECT count(*) INTO total
+        FROM bsc.applicant_profiles p
+        LEFT JOIN LATERAL (
+            SELECT ap.id, ap.registration_number, ap.status
+            FROM bsc.applications ap
+            WHERE ap.applicant_profile_id = p.id
+            ORDER BY ap.created_at DESC, ap.id LIMIT 1
+        ) a ON true
+        WHERE (p_search IS NULL OR p.full_name ILIKE '%' || p_search || '%'
+            OR a.registration_number ILIKE '%' || p_search || '%')
+            AND (p_status IS NULL OR a.status = p_status);
+    RETURN total;
 END;
 $$;
 
@@ -336,7 +360,8 @@ GRANT EXECUTE ON FUNCTION bsc_api.create_major(uuid, text, text, text) TO bsc_ru
 GRANT EXECUTE ON FUNCTION bsc_api.update_major(uuid, smallint, text, text, boolean) TO bsc_runtime;
 GRANT EXECUTE ON FUNCTION bsc_api.list_users(uuid, text, integer, integer) TO bsc_runtime;
 GRANT EXECUTE ON FUNCTION bsc_api.list_audit_logs(uuid, integer, integer) TO bsc_runtime;
-GRANT EXECUTE ON FUNCTION bsc_api.list_applicants(uuid, text, integer, integer) TO bsc_runtime;
+GRANT EXECUTE ON FUNCTION bsc_api.list_applicants(uuid, text, text, integer, integer) TO bsc_runtime;
+GRANT EXECUTE ON FUNCTION bsc_api.count_applicants(uuid, text, text) TO bsc_runtime;
 GRANT EXECUTE ON FUNCTION bsc_api.list_published_announcements() TO bsc_runtime;
 GRANT EXECUTE ON FUNCTION bsc_api.create_announcement(uuid, text, text, boolean) TO bsc_runtime;
 GRANT EXECUTE ON FUNCTION bsc_api.update_announcement(uuid, uuid, text, text, boolean) TO bsc_runtime;

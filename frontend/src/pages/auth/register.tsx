@@ -38,7 +38,7 @@ export default function Register() {
       { email: values.email, password: values.password },
       {
         onSuccess: () => {
-          toast.success('Akun berhasil dibuat');
+          toast.success('Akun berhasil dibuat. Lengkapi biodata Anda untuk mendaftar.');
           navigate('/siswa/dashboard');
         },
         onError: (err) => toast.error(err.message),

@@ -29,6 +29,29 @@ export async function register(email: string, password: string): Promise<{ id: s
   }
 }
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Kata sandi saat ini wajib diisi'),
+  newPassword: z.string().min(8, 'Kata sandi baru minimal 8 karakter').max(128),
+});
+
+export async function changePassword(
+  email: string,
+  actorId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const account = await lookupAccount(email);
+  if (!account) {
+    throw new ApiError(401, 'INVALID_CREDENTIALS', 'Kata sandi saat ini salah');
+  }
+  const valid = await verifyPassword(currentPassword, account.password_hash);
+  if (!valid) {
+    throw new ApiError(401, 'INVALID_CREDENTIALS', 'Kata sandi saat ini salah');
+  }
+  const hash = await hashPassword(newPassword);
+  await callFn('replace_password_hash', [actorId, hash]);
+}
+
 export async function login(
   email: string,
   password: string

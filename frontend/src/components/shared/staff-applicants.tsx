@@ -8,8 +8,9 @@ import type { ApplicantRow } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input, Select } from '@/components/ui/input';
-import { EmptyState, ErrorState, LoadingState } from '@/components/shared/states';
+import { EmptyState, ErrorState } from '@/components/shared/states';
 import { Pagination } from '@/components/shared/pagination';
+import { TableSkeleton } from '@/components/shared/skeletons';
 import { StatusBadge } from '@/components/shared/status-badge';
 
 const FILTERABLE = Object.keys(STATUS_LABEL);
@@ -69,7 +70,9 @@ export function StaffApplicantsList({ apiPath, detailPath, defaultStatus, status
       </div>
 
       {list.isLoading ? (
-        <LoadingState />
+        <Card>
+          <TableSkeleton rows={8} cols={5} />
+        </Card>
       ) : list.isError ? (
         <ErrorState onRetry={() => list.refetch()} />
       ) : list.data!.applicants.length === 0 ? (

@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { EmptyState, ErrorState, PageHeader } from '@/components/shared/states';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 const empty = { title: '', body: '', publish: false };
 
@@ -50,7 +51,7 @@ export default function AdminPengumuman() {
     onError: (err) => toast.error(err.message),
   });
 
-  if (list.isLoading) return <LoadingState />;
+  if (list.isLoading) return <TableSkeleton />;
   if (list.isError) return <ErrorState onRetry={() => list.refetch()} />;
 
   return (

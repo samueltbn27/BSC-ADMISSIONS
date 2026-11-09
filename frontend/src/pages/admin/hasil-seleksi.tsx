@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input, Select, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { EmptyState, ErrorState, PageHeader } from '@/components/shared/states';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 export default function AdminHasilSeleksi() {
   const queryClient = useQueryClient();
@@ -45,7 +46,7 @@ export default function AdminHasilSeleksi() {
     onError: (err) => toast.error(err.message),
   });
 
-  if (queue.isLoading) return <LoadingState />;
+  if (queue.isLoading) return <TableSkeleton />;
   if (queue.isError) return <ErrorState onRetry={() => queue.refetch()} />;
 
   const applicants = queue.data!.applicants;

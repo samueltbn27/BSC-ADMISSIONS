@@ -21,6 +21,7 @@ Endpoint mutasi memerlukan header `Origin`/`Referer` yang sesuai (CSRF guard).
 | POST | `/auth/login` | `{email, password}` → cookie sesi |
 | POST | `/auth/logout` | Hapus sesi |
 | GET | `/auth/me` | Info akun sesi |
+| POST | `/auth/change-password` | `{currentPassword, newPassword}` — ganti kata sandi; semua sesi pengguna dihapus (perlu masuk ulang) |
 
 ## Calon Siswa
 
@@ -44,7 +45,7 @@ Endpoint mutasi memerlukan header `Origin`/`Referer` yang sesuai (CSRF guard).
 
 | Method | Path | Keterangan |
 |---|---|---|
-| GET | `/pendaftaran?q=&status=&limit=&offset=` | Antrean + pencarian pendaftar |
+| GET | `/pendaftaran?q=&status=&limit=&offset=` | Antrean + pencarian pendaftar; `total` akurat dari `count_applicants` |
 | GET | `/pendaftaran/:id` | Detail aplikasi |
 | POST | `/pendaftaran/:id/status` | `{status, note?}` transisi status |
 | POST | `/verifikasi/dokumen/:id` | `{status, note?}` verifikasi dokumen |

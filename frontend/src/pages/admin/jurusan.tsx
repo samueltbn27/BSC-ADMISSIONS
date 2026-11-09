@@ -9,7 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { ErrorState, PageHeader } from '@/components/shared/states';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 type FormState = { open: boolean; editing: Major | null };
 
@@ -42,7 +43,7 @@ export default function AdminJurusan() {
     onError: (err) => toast.error(err.message),
   });
 
-  if (majors.isLoading) return <LoadingState />;
+  if (majors.isLoading) return <TableSkeleton />;
   if (majors.isError) return <ErrorState onRetry={() => majors.refetch()} />;
 
   return (

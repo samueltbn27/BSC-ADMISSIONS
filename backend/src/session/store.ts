@@ -45,6 +45,12 @@ export const sessionStore = {
     sessions.delete(sid);
   },
 
+  deleteAllForUser(userId: string): void {
+    for (const [sid, record] of sessions) {
+      if (record.id === userId) sessions.delete(sid);
+    }
+  },
+
   size(): number {
     return sessions.size;
   },

@@ -62,8 +62,11 @@ applicationRoutes.get(
     const limit = Number(req.query.limit ?? 50);
     const offset = Number(req.query.offset ?? 0);
 
-    let rows = await selectFn('list_applicants', [req.user!.id, q ?? null, limit, offset]);
-    rows = rows.map((r) => ({
+    const [rows, total] = await Promise.all([
+      selectFn('list_applicants', [req.user!.id, q ?? null, status ?? null, limit, offset]),
+      callFn('count_applicants', [req.user!.id, q ?? null, status ?? null]),
+    ]);
+    const applicants = rows.map((r) => ({
       user_id: r.user_id,
       full_name: r.full_name,
       phone: r.phone,
@@ -72,10 +75,7 @@ applicationRoutes.get(
       status: r.st,
       created_at: r.created_at,
     }));
-    if (status) {
-      rows = rows.filter((r) => r.status === status);
-    }
-    ok(res, { applicants: rows, total: rows.length });
+    ok(res, { applicants, total: Number(total ?? applicants.length) });
   })
 );
 

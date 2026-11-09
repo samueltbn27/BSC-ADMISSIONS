@@ -124,7 +124,10 @@ adminRoutes.get('/pendaftar', asyncHandler(async (req: AuthedRequest, res) => {
   const q = typeof req.query.q === 'string' ? req.query.q.trim() : null;
   const limit = Number(req.query.limit ?? 50);
   const offset = Number(req.query.offset ?? 0);
-  const rows = await selectFn('list_applicants', [req.user!.id, q, limit, offset]);
+  const [rows, total] = await Promise.all([
+    selectFn('list_applicants', [req.user!.id, q, null, limit, offset]),
+    callFn('count_applicants', [req.user!.id, q, null]),
+  ]);
   const applicants = rows.map((r: any) => ({
     user_id: r.user_id,
     full_name: r.full_name,
@@ -134,7 +137,7 @@ adminRoutes.get('/pendaftar', asyncHandler(async (req: AuthedRequest, res) => {
     status: r.st,
     created_at: r.created_at,
   }));
-  ok(res, { applicants, total: applicants.length });
+  ok(res, { applicants, total: Number(total ?? applicants.length) });
 }));
 
 adminRoutes.get('/audit-log', asyncHandler(async (req: AuthedRequest, res) => {

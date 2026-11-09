@@ -33,7 +33,7 @@ dashboardRoutes.get(
   asyncHandler(async (req: AuthedRequest, res) => {
     const [catalog, rawApplicants] = await Promise.all([
       callFn('get_catalog'),
-      selectFn('list_applicants', [req.user!.id, null, 100, 0]),
+      selectFn('list_applicants', [req.user!.id, null, null, 100, 0]),
     ]);
     const applicants = rawApplicants.map((a: any) => ({
       user_id: a.user_id,
@@ -65,7 +65,7 @@ dashboardRoutes.get(
   asyncHandler(async (req: AuthedRequest, res) => {
     const [users, rawApplicants, periods, announcements] = await Promise.all([
       selectFn('list_users', [req.user!.id, null, 100, 0]),
-      selectFn('list_applicants', [req.user!.id, null, 100, 0]),
+      selectFn('list_applicants', [req.user!.id, null, null, 100, 0]),
       callFn('list_periods', [req.user!.id]),
       callFn('list_announcements', [req.user!.id]),
     ]);

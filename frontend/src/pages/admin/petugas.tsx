@@ -10,7 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input, Select } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ErrorState, LoadingState, PageHeader } from '@/components/shared/states';
+import { ErrorState, PageHeader } from '@/components/shared/states';
+import { TableSkeleton } from '@/components/shared/skeletons';
 
 const empty = { email: '', password: '', role: 'committee' as 'committee' | 'admin' };
 
@@ -46,7 +47,7 @@ export default function AdminPetugas() {
     onError: (err) => toast.error(err.message),
   });
 
-  if (users.isLoading) return <LoadingState />;
+  if (users.isLoading) return <TableSkeleton />;
   if (users.isError) return <ErrorState onRetry={() => users.refetch()} />;
 
   return (
