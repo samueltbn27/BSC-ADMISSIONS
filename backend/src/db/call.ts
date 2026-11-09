@@ -18,8 +18,11 @@ async function queryWithRetry(sql: string, params: unknown[]) {
     try {
       return await runtimePool.query(sql, params);
     } catch (err) {
-      if (err instanceof pg.DatabaseError && RETRYABLE.has(err.code ?? '')) {
-        continue;
+      if (err instanceof pg.DatabaseError) {
+        if (RETRYABLE.has(err.code ?? '')) {
+          continue;
+        }
+        throw new DbError(err.code ?? 'P0000', 'Database operation failed');
       }
       throw err;
     }
