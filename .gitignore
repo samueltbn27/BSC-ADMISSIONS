@@ -17,3 +17,5 @@ dist/
 
 # Upload dokumen (privat, di luar direktori publik)
 storage/
+
+# Asset lokal Cursor (bukan bagian repository).n.cursor/skills/
