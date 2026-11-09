@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: bsc-db
+    environment:
+      POSTGRES_DB: bsc_admissions
+      POSTGRES_USER: bsc_migrator
+      POSTGRES_PASSWORD: ganti-dengan-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bsc_migrator -d bsc_admissions"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

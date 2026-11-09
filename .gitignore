@@ -9,3 +9,11 @@ __pycache__/
 *.backup
 *.log
 .DS_Store
+
+# Node.js
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Upload dokumen (privat, di luar direktori publik)
+storage/
