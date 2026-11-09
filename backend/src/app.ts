@@ -50,22 +50,11 @@ const globalLimiter =
       });
 app.use(globalLimiter);
 
-const authLimiter =
-  env.NODE_ENV === 'test'
-    ? noop
-    : rateLimit({
-        windowMs: 60 * 1000,
-        limit: env.RATE_LIMIT_AUTH_MAX,
-        standardHeaders: true,
-        legacyHeaders: false,
-        message: { error: { code: 'RATE_LIMITED', message: 'Terlalu banyak percobaan login' } },
-      });
-
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/api/v1/auth', authLimiter, csrfGuard, authRoutes);
+app.use('/api/v1/auth', csrfGuard, authRoutes);
 app.use('/api/v1', csrfGuard, publicRoutes);
 app.use('/api/v1/catalog', csrfGuard, catalogRoutes);
 app.use('/api/v1/siswa/profil', csrfGuard, profileRoutes);
