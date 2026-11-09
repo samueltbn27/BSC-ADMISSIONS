@@ -44,5 +44,5 @@ export async function login(
   if (account.account_status !== 'active') {
     throw new ApiError(403, 'ACCOUNT_INACTIVE', 'Akun tidak aktif');
   }
-  return { id: String(account.id), email: String(account.email), role: account.role_code as Role };
+  return { id: String(account.id), email, role: account.role_code as Role };
 }

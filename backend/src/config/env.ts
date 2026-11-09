@@ -17,7 +17,10 @@ const schema = z.object({
 
   SESSION_COOKIE_NAME: z.string().default('bsc_session'),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().default(8),
-  COOKIE_SECURE: z.coerce.boolean().default(false),
+  COOKIE_SECURE: z
+    .string()
+    .default('false')
+    .transform((v) => v === 'true'),
 
   UPLOAD_DIR: z.string().default('../storage/uploads'),
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(20 * 1024 * 1024),
