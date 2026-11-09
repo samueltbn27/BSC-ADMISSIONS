@@ -30,7 +30,7 @@ const globalLimiter =
     ? noop
     : rateLimit({
         windowMs: 60 * 1000,
-        limit: 300,
+        limit: env.RATE_LIMIT_MAX,
         standardHeaders: true,
         legacyHeaders: false,
         message: { error: { code: 'RATE_LIMITED', message: 'Terlalu banyak permintaan' } },
@@ -42,7 +42,7 @@ const authLimiter =
     ? noop
     : rateLimit({
         windowMs: 60 * 1000,
-        limit: 10,
+        limit: env.RATE_LIMIT_AUTH_MAX,
         standardHeaders: true,
         legacyHeaders: false,
         message: { error: { code: 'RATE_LIMITED', message: 'Terlalu banyak percobaan login' } },

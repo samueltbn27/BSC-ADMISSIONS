@@ -26,6 +26,9 @@ const schema = z.object({
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(20 * 1024 * 1024),
 
   ALLOWED_ORIGIN: z.string().default('http://localhost:5173'),
+
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
+  RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(10),
 });
 
 const parsed = schema.safeParse(process.env);
