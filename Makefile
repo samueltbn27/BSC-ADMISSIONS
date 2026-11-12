@@ -22,3 +22,12 @@ web-dev:
 	cd frontend && npm run dev
 web-build:
 	cd frontend && npm run build
+
+demo-setup:
+	python3 scripts/demo.py setup
+demo-start:
+	python3 scripts/demo.py start
+demo-reset:
+	python3 scripts/demo.py reset
+demo-stop:
+	python3 scripts/demo.py stop

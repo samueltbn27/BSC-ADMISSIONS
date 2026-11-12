@@ -75,3 +75,7 @@ Endpoint mutasi memerlukan header `Origin`/`Referer` yang sesuai (CSRF guard).
 | Role/ownership tidak diizinkan (42501) | 403 |
 | Konflik data unik (23505) | 409 |
 | Error internal (tidak membocorkan detail) | 500 |
+
+## Pembaruan Demo V1 — 12 November 2026
+
+Registrasi `POST /auth/register` kini menghasilkan `{data:{id,registered:true}}` tanpa cookie sesi; login terpisah wajib dilakukan. Endpoint lain memakai cookie setelah login. Request terlindungi memeriksa status akun/role/password_changed_at terkini. Upload mengembalikan ID saja, bukan storageKey; UPLOAD_DIR relatif terhadap working directory backend (atau absolut), bukan direktori source/dist. Format upload diparse sebagai PDF/PNG/JPEG selain pemeriksaan ekstensi/MIME/signature. Kesalahan multipart menghasilkan 400. Default demo maksimal 5 MiB, mengikuti batas per jenis pada database.

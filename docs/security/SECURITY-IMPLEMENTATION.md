@@ -47,3 +47,7 @@ Kontrol keamanan ini melengkapi kontrol database existing ([SECURITY.md](../data
 - Verifikasi email & reset password belum tersedia (tanpa infrastruktur SMTP).
 - Upload tidak memindai malware (perlu integrasi antivirus di produksi).
 - Retensi PII/anonimisasi akun mengikuti kebijakan sekolah (lihat SECURITY.md database).
+
+## Pembaruan Demo V1 — 12 November 2026
+
+Registrasi tidak membuat sesi. Middleware sesi memeriksa ulang role, account_status dan password_changed_at dari authenticator pool setiap request terlindungi. Server bind loopback secara default. Parser konten PDF/PNG/JPEG, ekstensi, MIME, ukuran, dimensi gambar dan ownership/status diperiksa sebelum penulisan privat; DB mengulang pemeriksaan ownership saat menyimpan metadata. Berkas 0600 dan direktori 0700. Parser bukan antivirus dan penyimpanan filesystem+SQL tidak memiliki transaksi terdistribusi. Error internal tidak lagi mencetak objek error atau query string. Laporan ini bukan klaim tes end-to-end final: pengujian tambahan dihentikan atas instruksi pengguna. Lihat docs/demo/IMPLEMENTATION_REPORT.md untuk hasil sebenarnya dan batasan.
