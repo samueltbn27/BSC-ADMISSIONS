@@ -37,6 +37,7 @@ describe('Keamanan Endpoint', () => {
     m.callFn.mockReset();
     m.selectFn.mockReset();
     m.lookupAccount.mockReset();
+    m.lookupAccount.mockImplementation(async () => ({ id: 'u-1', account_status: 'active', role_code: 'applicant', password_changed_at: new Date(0) }));
   });
 
   it('menolak permintaan mutasi dari origin asing (CSRF)', async () => {
@@ -69,6 +70,7 @@ describe('Keamanan Endpoint', () => {
   });
 
   it('mengizinkan akses panitia ke antrean pendaftaran', async () => {
+    m.lookupAccount.mockResolvedValue({ id: 'u-1', account_status: 'active', role_code: 'committee', password_changed_at: new Date(0) });
     m.selectFn.mockResolvedValue([]);
     m.callFn.mockResolvedValue(0);
     const res = await request(app)

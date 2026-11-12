@@ -46,6 +46,8 @@ export function StaffApplicantsList({ apiPath, detailPath, defaultStatus, status
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Cari nama atau nomor pendaftaran..."
+            aria-label="Cari pendaftar"
+            maxLength={150}
             value={q}
             onChange={(e) => {
               setQ(e.target.value);
@@ -55,6 +57,7 @@ export function StaffApplicantsList({ apiPath, detailPath, defaultStatus, status
           />
         </div>
         <Select
+          aria-label="Filter status pendaftaran"
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);

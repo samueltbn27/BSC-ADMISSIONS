@@ -60,11 +60,7 @@ export function useAuth() {
 
   const register = useMutation({
     mutationFn: (body: { email: string; password: string }) =>
-      api.post<AuthResponse>('/auth/register', body),
-    onSuccess: (data) => {
-      setCachedUser(data.user);
-      queryClient.setQueryData(['auth', 'me'], { user: data.user });
-    },
+      api.post<{ id: string; registered: boolean }>('/auth/register', body),
   });
 
   const logout = useMutation({

@@ -1,5 +1,8 @@
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { PDFDocument } from 'pdf-lib';
+import { PNG } from 'pngjs';
+import jpeg from 'jpeg-js';
 
 export type SafeMime = 'application/pdf' | 'image/jpeg' | 'image/png';
 
@@ -19,6 +22,33 @@ export function sniffMime(buf: Buffer): SafeMime | null {
   const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   if (buf.length >= 8 && buf.subarray(0, 8).equals(pngMagic)) {
     return 'image/png';
+  }
+  return null;
+}
+
+// Parse the actual content as well as its signature. This is not malware scanning.
+export async function validateContent(buf: Buffer): Promise<SafeMime | null> {
+  const mime = sniffMime(buf);
+  try {
+    if (mime === 'application/pdf') {
+      if (!buf.subarray(-2048).includes(Buffer.from('%%EOF'))) return null;
+      const doc = await PDFDocument.load(buf, { ignoreEncryption: false, throwOnInvalidObject: true });
+      if (doc.getPageCount() < 1 || doc.getPageCount() > 100) return null;
+      return mime;
+    }
+    if (mime === 'image/png') {
+      if (buf.length < 33) return null;
+      const width = buf.readUInt32BE(16), height = buf.readUInt32BE(20);
+      if (!width || !height || width * height > 12_000_000) return null;
+      PNG.sync.read(buf, { checkCRC: true });
+      return mime;
+    }
+    if (mime === 'image/jpeg') {
+      jpeg.decode(buf, { maxResolutionInMP: 12, maxMemoryUsageInMB: 80, tolerantDecoding: false });
+      return mime;
+    }
+  } catch {
+    return null;
   }
   return null;
 }

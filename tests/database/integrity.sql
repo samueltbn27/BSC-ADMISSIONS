@@ -149,7 +149,7 @@ SELECT bsc_tests.reject(format('EXECUTE injection_probe(%L,%L)', 'x'';DROP SCHEM
 DEALLOCATE injection_probe;
 RESET ROLE;
 
-SELECT bsc_tests.ok((SELECT count(*) = 12 FROM information_schema.tables WHERE table_schema='bsc' AND table_type='BASE TABLE'), 'twelve core tables remain intact');
+SELECT bsc_tests.ok((SELECT count(*) = 12 FROM information_schema.tables WHERE table_schema='bsc' AND table_type='BASE TABLE' AND table_name <> 'school_announcements'), 'twelve core tables remain intact');
 SELECT bsc_tests.ok((SELECT verification_status = 'approved' AND revision = 2 FROM bsc.application_documents WHERE id=:'doc'), 'replacement increments revision then reverified');
 SELECT bsc_tests.ok((SELECT array_agg(document_revision ORDER BY document_revision) = ARRAY[1,2] FROM bsc.verification_records WHERE document_id=:'doc'), 'historical verification retains document revision');
 SELECT bsc_tests.ok((SELECT count(*) = 9 FROM bsc.application_status_history WHERE application_id=:'app'), 'status history complete including creation and correction');

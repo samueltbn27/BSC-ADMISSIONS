@@ -8,16 +8,14 @@ import { changePassword, changePasswordSchema, credentialsSchema, login, registe
 
 export const authRoutes = Router();
 
-const authLimiter =
-  env.NODE_ENV === 'test'
-    ? (_req: any, _res: any, next: any) => next()
-    : rateLimit({
+export const makeAuthLimiter = (limit: number) => rateLimit({
         windowMs: 60 * 1000,
-        limit: env.RATE_LIMIT_AUTH_MAX,
+        limit,
         standardHeaders: true,
         legacyHeaders: false,
         message: { error: { code: 'RATE_LIMITED', message: 'Terlalu banyak percobaan login' } },
       });
+const authLimiter = makeAuthLimiter(env.RATE_LIMIT_AUTH_MAX);
 
 const cookieOptions = {
   httpOnly: true,
@@ -30,9 +28,7 @@ const cookieOptions = {
 authRoutes.post('/register', authLimiter, asyncHandler(async (req, res) => {
     const body = credentialsSchema.parse(req.body);
     const { id } = await register(body.email, body.password);
-    const session = sessionStore.create({ id, email: body.email, role: 'applicant' });
-    res.cookie(env.SESSION_COOKIE_NAME, session.sid, cookieOptions);
-    ok(res, { user: { id, email: body.email, role: 'applicant' } }, 201);
+    ok(res, { id, registered: true }, 201);
   })
 );
 

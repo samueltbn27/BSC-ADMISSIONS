@@ -1,170 +1,59 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import {
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  ClipboardList,
-  FileCheck2,
-  GraduationCap,
-  Search,
-  UserPlus,
-} from 'lucide-react';
+import { ArrowRight, BookOpen, Check } from 'lucide-react';
 import { api } from '@/lib/api';
-import { formatDate } from '@/lib/utils';
+import { formatBytes, formatDate } from '@/lib/utils';
 import type { Catalog } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ErrorState, LoadingState } from '@/components/shared/states';
 
-const STEPS = [
-  { icon: UserPlus, title: '1. Buat Akun', desc: 'Registrasi dengan email aktif dan kata sandi.' },
-  { icon: ClipboardList, title: '2. Isi Formulir', desc: 'Lengkapi biodata dan pilih jurusan.' },
-  { icon: FileCheck2, title: '3. Unggah Dokumen', desc: 'Unggah ijazah/SKL, kartu keluarga, dan pas foto.' },
-  { icon: Search, title: '4. Verifikasi', desc: 'Panitia memeriksa kelengkapan berkas.' },
+const steps = [
+  { title: 'Buat akun', desc: 'Daftar dengan email dan masuk ke akun calon siswa.' },
+  { title: 'Lengkapi formulir', desc: 'Simpan biodata dan pilih program keahlianmu.' },
+  { title: 'Kirim berkas', desc: 'Unggah dokumen dummy, lalu kirim pendaftaran.' },
+  { title: 'Pantau verifikasi', desc: 'Lihat hasil pemeriksaan dan catatan dari panitia.' },
 ];
 
 export default function Home() {
-  const catalog = useQuery({
-    queryKey: ['catalog'],
-    queryFn: () => api.get<Catalog>('/catalog'),
-  });
-
-  const activePeriods = (catalog.data?.periods ?? []).filter(
-    (p) => p.is_active && new Date(p.closes_at) > new Date()
-  );
-
-  return (
-    <div>
-      <section className="bg-gradient-to-br from-primary-950 via-primary-900 to-primary-700 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center lg:py-24">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium">
-            <GraduationCap className="h-4 w-4" />
-            Tahun Ajaran 2026/2027
-          </p>
-          <h1 className="mx-auto mt-6 max-w-3xl text-3xl font-bold leading-tight lg:text-5xl">
-            Penerimaan Murid Baru SMK Bina Sarana Cendekia
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-slate-200">
-            Daftar secara online, pantau status pendaftaran, dan lihat hasil seleksi melalui sistem PPDB resmi sekolah.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/register">
-              <Button size="lg" className="bg-white text-primary-900 hover:bg-slate-100">
-                Daftar Sekarang <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/alur-pendaftaran">
-              <Button size="lg" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10">
-                Lihat Alur PPDB
-              </Button>
-            </Link>
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: () => api.get<Catalog>('/catalog') });
+  const periods = (catalog.data?.periods ?? []).filter((p) => p.is_active && new Date(p.opens_at) <= new Date() && new Date(p.closes_at) > new Date());
+  return <div>
+    <section className="bg-primary-950 text-white">
+      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 lg:grid-cols-[1.2fr_1fr] lg:py-24">
+        <div>
+          <p className="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-200"><span className="h-2 w-2 rounded-full bg-sky-300" /> BSC Admissions · Penerimaan Murid Baru</p>
+          <h1 className="max-w-xl text-4xl font-bold leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl">Langkah pertama menuju masa depanmu.</h1>
+          <p className="mt-6 max-w-lg text-base leading-7 text-blue-100">Mulai perjalanan di SMK Bina Sarana Cendekia. Lengkapi pendaftaran, pilih jurusan, dan pantau verifikasi dalam satu tempat.</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/register"><Button size="lg" className="bg-white text-primary-950 hover:bg-blue-50">Daftar Sekarang <ArrowRight className="h-4 w-4" /></Button></Link>
+            <Link to="/login"><Button size="lg" variant="outline" className="border-blue-300/40 bg-transparent text-white hover:bg-white/10">Login ke Akun</Button></Link>
           </div>
+          <p className="mt-5 text-xs leading-5 text-blue-200">Prototype akademik untuk UTS Manajemen Proyek.<br />Seluruh data pendaftar dalam demo bersifat sintetis.</p>
         </div>
+        <div className="overflow-hidden rounded-2xl border border-white/20 bg-white text-slate-900 shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-100 p-6"><span className="font-semibold">Perjalanan pendaftaran</span><BookOpen className="h-5 w-5 text-primary-700" /></div>
+          <ol className="space-y-6 p-6 sm:p-8">{steps.map((step, i) => <li key={step.title} className="flex gap-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-primary-800">0{i + 1}</span>
+            <div><p className="font-semibold">{step.title}</p><p className="mt-1 text-sm leading-6 text-slate-500">{step.desc}</p></div>
+          </li>)}</ol>
+          <div className="border-t border-blue-100 bg-blue-50 px-6 py-4 text-xs font-medium text-primary-900">Simpan draft, lanjutkan selama periode demo aktif.</div>
+        </div>
+      </div>
+    </section>
+    {catalog.isLoading ? <LoadingState /> : catalog.isError ? <ErrorState message="Katalog belum dapat dimuat. Periksa koneksi database." onRetry={() => catalog.refetch()} /> : <>
+      <section className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5 py-7">
+        <div><p className="text-xs font-semibold uppercase tracking-widest text-primary-700">Periode pendaftaran contoh</p><h2 className="mt-1 text-lg font-bold">{periods[0]?.name ?? 'Belum ada periode aktif'}</h2></div>
+        {periods[0] ? <p className="text-sm text-slate-600">{formatDate(periods[0].opens_at)} — {formatDate(periods[0].closes_at)}<span className="ml-3 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">Dibuka</span></p> : <p className="text-sm text-slate-500">Panitia perlu mengaktifkan periode sebelum pendaftaran dibuat.</p>}
+      </div></section>
+      <section className="mx-auto max-w-6xl px-5 py-16" id="jurusan">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-700">Program keahlian</p><h2 className="text-3xl font-bold tracking-tight">Temukan bidang pilihanmu.</h2></div><p className="max-w-sm text-sm leading-6 text-slate-500">Lima pilihan jurusan dari katalog proyek. Nama dan persyaratan resmi menunggu konfirmasi sekolah.</p></div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{catalog.data!.majors.map((m, i) => <Card key={m.id}><CardContent className="p-6"><div className="flex items-center justify-between"><span className="text-xs font-medium text-slate-400">0{i + 1}</span><span className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-primary-800">{m.code}</span></div><h3 className="mt-5 text-lg font-semibold leading-7">{m.name}</h3><p className="mt-2 text-sm text-slate-500">{m.description}</p></CardContent></Card>)}</div>
       </section>
-
-      {catalog.isLoading ? (
-        <LoadingState />
-      ) : catalog.isError ? (
-        <ErrorState message="Gagal memuat katalog jurusan" onRetry={() => catalog.refetch()} />
-      ) : (
-        <>
-          <section className="mx-auto max-w-6xl px-4 py-14">
-            <div className="mb-8 text-center">
-              <h2 className="text-2xl font-bold text-slate-900">Program Keahlian</h2>
-              <p className="mt-2 text-sm text-slate-500">Lima program keahlian unggulan SMK Bina Sarana Cendekia</p>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {catalog.data!.majors.map((major) => (
-                <Card key={major.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-                        <GraduationCap className="h-5 w-5 text-primary-800" />
-                      </div>
-                      <span className="text-xs font-bold tracking-wide text-primary-700">{major.code}</span>
-                    </div>
-                    <h3 className="mt-4 font-semibold text-slate-900">{major.name}</h3>
-                    <p className="mt-1 text-sm text-slate-500">{major.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-
-          <section className="bg-white py-14">
-            <div className="mx-auto max-w-6xl px-4">
-              <div className="mb-8 text-center">
-                <h2 className="text-2xl font-bold text-slate-900">Tahapan Pendaftaran</h2>
-                <p className="mt-2 text-sm text-slate-500">Empat langkah mudah menuju SMK Bina Sarana Cendekia</p>
-              </div>
-              <div className="grid gap-5 md:grid-cols-4">
-                {STEPS.map((step) => (
-                  <Card key={step.title}>
-                    <CardContent className="p-6">
-                      <step.icon className="h-8 w-8 text-primary-700" />
-                      <h3 className="mt-3 font-semibold text-slate-900">{step.title}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{step.desc}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {activePeriods.length > 0 && (
-            <section className="mx-auto max-w-6xl px-4 py-14">
-              <div className="mb-8 text-center">
-                <h2 className="text-2xl font-bold text-slate-900">Jadwal PPDB Aktif</h2>
-              </div>
-              <div className="grid gap-5 md:grid-cols-2">
-                {activePeriods.map((period) => (
-                  <Card key={period.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-                          <CalendarDays className="h-5 w-5 text-primary-800" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900">{period.name}</h3>
-                          <p className="text-xs text-slate-500">Tahun Ajaran {period.academic_year}</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-xs text-slate-500">Dibuka</p>
-                          <p className="font-medium text-slate-800">{formatDate(period.opens_at)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500">Ditutup</p>
-                          <p className="font-medium text-slate-800">{formatDate(period.closes_at)}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="bg-primary-900 py-12 text-white">
-            <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 md:flex-row">
-              <div className="flex items-center gap-4">
-                <CheckCircle2 className="h-10 w-10 text-emerald-400" />
-                <div>
-                  <h3 className="text-lg font-bold">Siap menjadi bagian dari keluarga besar kami?</h3>
-                  <p className="text-sm text-slate-200">Pendaftaran dibuka sesuai jadwal periode aktif.</p>
-                </div>
-              </div>
-              <Link to="/register">
-                <Button size="lg" className="bg-white text-primary-900 hover:bg-slate-100">
-                  Daftar Sekarang
-                </Button>
-              </Link>
-            </div>
-          </section>
-        </>
-      )}
-    </div>
-  );
+      <section className="border-y border-slate-200 bg-white" id="persyaratan"><div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 lg:grid-cols-2">
+        <div><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-700">Persiapan pendaftaran</p><h2 className="text-3xl font-bold tracking-tight">Siapkan berkasmu.<br />Lanjutkan dengan tenang.</h2><p className="mt-4 max-w-md text-sm leading-7 text-slate-500">Lengkapi nama, tempat dan tanggal lahir, jenis kelamin, alamat, serta nomor telepon. Untuk demo, gunakan file dummy yang dibuat script setup.</p><Link to="/alur-pendaftaran" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary-800">Pelajari tahapan pendaftaran <ArrowRight className="h-4 w-4" /></Link></div>
+        <div className="divide-y divide-slate-100">{catalog.data!.document_types.map((t) => <div key={t.id} className="flex items-start gap-3 py-4 first:pt-0"><Check className="mt-1 h-5 w-5 shrink-0 text-primary-700" /><div><h3 className="font-semibold">{t.name} <span className="text-xs font-normal text-slate-500">· {t.is_required ? 'Wajib' : 'Opsional'}</span></h3><p className="mt-1 text-sm text-slate-500">{t.allowed_mime_types.map((m) => (m.split('/')[1] ?? m).toUpperCase()).join(' / ')} · maksimal {formatBytes(t.max_size_bytes)}</p></div></div>)}</div>
+      </div></section>
+    </>}
+  </div>;
 }

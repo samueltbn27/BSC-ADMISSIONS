@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  h1, h2 { text-wrap: balance; }
+  :focus-visible { outline: 3px solid #38bdf8; outline-offset: 3px; }
+  button, a { touch-action: manipulation; }
+  [id] { scroll-margin-top: 90px; }
   body {
     @apply bg-slate-100 text-slate-900 antialiased;
   }

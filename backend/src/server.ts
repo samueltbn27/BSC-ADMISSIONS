@@ -6,7 +6,7 @@ async function main() {
   await runtimePool.query('SELECT 1');
   await authPool.query('SELECT 1');
 
-  const server = app.listen(env.PORT, () => {
+  const server = app.listen(env.PORT, env.HOST, () => {
     console.log(`BSC Admissions API berjalan di http://localhost:${env.PORT} (${env.NODE_ENV})`);
   });
 

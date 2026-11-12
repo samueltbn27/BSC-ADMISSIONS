@@ -6,6 +6,7 @@ dotenv.config();
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
+  HOST: z.string().default('127.0.0.1'),
 
   PGHOST: z.string().default('127.0.0.1'),
   PGPORT: z.coerce.number().int().positive().default(5432),

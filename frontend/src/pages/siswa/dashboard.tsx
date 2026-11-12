@@ -28,7 +28,7 @@ export default function SiswaDashboard() {
 
   return (
     <div>
-      <PageHeader title="Dashboard Calon Siswa" description="Pantau progres pendaftaran Anda di sini." />
+      <PageHeader title={profile?.full_name ? `Halo, ${profile.full_name}` : 'Dashboard Calon Siswa'} description="Lengkapi formulir, unggah berkas, dan pantau verifikasi pendaftaran." action={<Link to="/siswa/biodata"><Button>Lengkapi Formulir</Button></Link>} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
@@ -63,7 +63,7 @@ export default function SiswaDashboard() {
             <div>
               <p className="text-xs text-slate-500">Langkah Berikutnya</p>
               <p className="text-sm font-semibold text-slate-900">
-                {!profileComplete ? 'Lengkapi biodata' : applications.length === 0 ? 'Buat pendaftaran' : 'Lengkapi dokumen'}
+                {!profileComplete ? 'Lengkapi biodata' : applications.length === 0 ? 'Buat pendaftaran' : applications[0]?.status === 'verified' ? 'Verifikasi selesai' : applications[0]?.status === 'submitted' || applications[0]?.status === 'under_review' ? 'Tunggu pemeriksaan panitia' : applications[0]?.status === 'correction_requested' ? 'Perbaiki berkas' : 'Lengkapi dokumen'}
               </p>
             </div>
           </CardContent>

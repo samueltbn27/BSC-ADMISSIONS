@@ -25,10 +25,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const error = body?.error;
-    if (res.status === 401 && !window.location.pathname.startsWith('/login')) {
+    if (res.status === 401 && !path.startsWith('/auth/') && /^\/(siswa|panitia|admin)\//.test(window.location.pathname)) {
       const current = window.location.pathname;
-      if (current !== '/') window.location.href = `/login?next=${encodeURIComponent(current)}`;
-      else window.location.href = '/login';
+      window.location.href = `/login?next=${encodeURIComponent(current)}`;
     }
     throw new ApiClientError(
       res.status,

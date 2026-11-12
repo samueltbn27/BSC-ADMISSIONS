@@ -260,6 +260,8 @@ function Detail({ id }: { id: string }) {
         <Card>
           <CardHeader><CardTitle>Aksi Lanjutan</CardTitle></CardHeader>
           <CardContent className="space-y-3">
+            <p className="text-xs leading-5 text-slate-500">Pilihan jurusan disimpan sebagai draft. Lengkapi biodata dan dokumen wajib sebelum mengirim.</p>
+            <Link to="/siswa/biodata" className="block"><Button variant="outline" className="w-full">Lengkapi Formulir Biodata</Button></Link>
             <Link to={`/siswa/dokumen?app=${id}`} className="block">
               <Button variant="secondary" className="w-full">Kelola Dokumen</Button>
             </Link>

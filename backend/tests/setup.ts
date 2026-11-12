@@ -20,6 +20,7 @@ const defaults: Record<string, string> = {
   UPLOAD_DIR: 'storage/uploads-test',
   UPLOAD_MAX_BYTES: '20971520',
   ALLOWED_ORIGIN: 'http://localhost:5173',
+  RATE_LIMIT_AUTH_MAX: '1000',
 };
 
 for (const [key, value] of Object.entries(defaults)) {

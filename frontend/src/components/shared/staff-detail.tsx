@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatBytes, formatDate, STATUS_LABEL } from '@/lib/utils';
-import type { ApplicationDetail } from '@/types';
+import type { ApplicationDetail, Catalog } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/input';
@@ -24,6 +24,7 @@ export function StaffDetail({ id, backPath }: Props) {
   const queryClient = useQueryClient();
   const [note, setNote] = useState('');
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const catalog = useQuery({ queryKey: ['catalog'], queryFn: () => api.get<Catalog>('/catalog') });
 
   const application = useQuery({
     queryKey: ['staff-application', id],
@@ -168,7 +169,7 @@ export function StaffDetail({ id, backPath }: Props) {
                 </Button>
               </div>
             ))}
-            {transitions[app.status]?.length === 0 && (
+            {!transitions[app.status]?.length && (
               <p className="text-sm text-slate-500">
                 Tidak ada transisi yang tersedia pada status {STATUS_LABEL[app.status]}.
               </p>
@@ -199,7 +200,7 @@ export function StaffDetail({ id, backPath }: Props) {
               <div key={doc.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-4">
                 <div>
                   <div className="flex items-center gap-3">
-                    <p className="font-medium text-slate-900">Dokumen #{doc.document_type_id}</p>
+                    <p className="font-medium text-slate-900">{catalog.data?.document_types.find((t) => t.id === doc.document_type_id)?.name ?? `Dokumen #${doc.document_type_id}`}</p>
                     <DocStatusBadge status={doc.verification_status} />
                   </div>
                   <p className="mt-1 text-xs text-slate-500">

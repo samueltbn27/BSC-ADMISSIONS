@@ -35,17 +35,15 @@ describe('API Autentikasi', () => {
     m.lookupAccount.mockReset();
   });
 
-  it('mendaftarkan calon siswa dan mengirim cookie sesi', async () => {
+  it('mendaftarkan calon siswa tanpa sesi sebelum login', async () => {
     m.callFn.mockResolvedValue('11111111-1111-1111-1111-111111111111');
     const res = await request(app)
       .post('/api/v1/auth/register')
       .send({ email: 'Budi@Example.test', password: 'rahasia123' });
 
     expect(res.status).toBe(201);
-    expect(res.body.data.user.role).toBe('applicant');
-    expect(res.body.data.user.email).toBe('budi@example.test');
-    expect(res.headers['set-cookie']?.[0]).toContain('bsc_session=');
-    expect(res.headers['set-cookie']?.[0]).toContain('HttpOnly');
+    expect(res.body.data.registered).toBe(true);
+    expect(res.headers['set-cookie']).toBeUndefined();
 
     const [fn, params] = m.callFn.mock.calls[0];
     expect(fn).toBe('register_account');
@@ -148,11 +146,9 @@ describe('API Autentikasi', () => {
     const login = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'c@example.test', password: 'rahasia123' });
-    console.log('LOGIN', login.status, JSON.stringify(login.headers['set-cookie']));
     const cookie = login.headers['set-cookie']?.[0].split(';')[0];
 
     const me = await request(app).get('/api/v1/auth/me').set('Cookie', cookie);
-    console.log('ME', me.status, JSON.stringify(me.body));
     expect(me.status).toBe(200);
 
     const out = await request(app).post('/api/v1/auth/logout').set('Cookie', cookie);

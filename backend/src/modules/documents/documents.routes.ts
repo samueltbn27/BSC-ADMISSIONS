@@ -2,26 +2,20 @@ import { Router } from 'express';
 import { z } from 'zod';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import multer from 'multer';
 import { callFn } from '../../db/call.js';
 import { env } from '../../config/env.js';
 import { requireAuth, requireRole, type AuthedRequest } from '../../middlewares/auth.js';
 import { ApiError, asyncHandler, ok } from '../../utils/http.js';
-import { EXT_BY_MIME, randomObjectKey, resolveStoragePath, sniffMime } from '../../utils/files.js';
+import { EXT_BY_MIME, randomObjectKey, resolveStoragePath, validateContent } from '../../utils/files.js';
 
 export const documentRoutes = Router();
 
-const uploadRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-  env.UPLOAD_DIR
-);
+const uploadRoot = path.resolve(process.cwd(), env.UPLOAD_DIR);
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: env.UPLOAD_MAX_BYTES, files: 1 },
+  limits: { fileSize: env.UPLOAD_MAX_BYTES, files: 1, fields: 2, parts: 3, fieldSize: 200 },
   fileFilter: (_req, file, cb) => {
     if (!file.originalname) return cb(new Error('File wajib diunggah'));
     cb(null, true);
@@ -52,6 +46,12 @@ documentRoutes.post(
       throw new ApiError(400, 'VALIDATION_ERROR', 'File wajib diunggah');
     }
 
+    // Authorize before decoding or writing any file. DB repeats this check atomically.
+    const owned = await callFn('get_application', [req.user!.id, body.applicationId]) as any;
+    if (!['draft', 'correction_requested'].includes(owned.application.status)) {
+      throw new ApiError(409, 'LOCKED', 'Dokumen hanya dapat diganti saat draft atau perbaikan.');
+    }
+
     const catalog = (await callFn('get_catalog')) as any;
     const docType = (catalog?.document_types ?? []).find(
       (t: any) => String(t.id) === String(body.documentTypeId) && t.is_active
@@ -60,8 +60,10 @@ documentRoutes.post(
       throw new ApiError(400, 'VALIDATION_ERROR', 'Jenis dokumen tidak valid');
     }
 
-    const sniffed = sniffMime(req.file.buffer);
-    if (!sniffed || !docType.allowed_mime_types.includes(sniffed)) {
+    const sniffed = await validateContent(req.file.buffer);
+    const extension = path.extname(req.file.originalname).toLowerCase();
+    const extensions = sniffed === 'application/pdf' ? ['.pdf'] : sniffed === 'image/png' ? ['.png'] : ['.jpg', '.jpeg'];
+    if (!sniffed || sniffed !== req.file.mimetype || !extensions.includes(extension) || !docType.allowed_mime_types.includes(sniffed)) {
       throw new ApiError(400, 'INVALID_FILE', 'Format file tidak diizinkan');
     }
     if (req.file.size > docType.max_size_bytes) {
@@ -70,8 +72,8 @@ documentRoutes.post(
 
     const storageKey = `applications/${body.applicationId}/${randomObjectKey()}`;
     const destination = resolveStoragePath(storageKey, uploadRoot);
-    await fs.mkdir(path.dirname(destination), { recursive: true });
-    await fs.writeFile(destination, req.file.buffer);
+    await fs.mkdir(path.dirname(destination), { recursive: true, mode: 0o700 });
+    await fs.writeFile(destination, req.file.buffer, { flag: 'wx', mode: 0o600 });
 
     try {
       const id = await callFn('put_document', [
@@ -82,7 +84,7 @@ documentRoutes.post(
         sniffed,
         req.file.size,
       ]);
-      ok(res, { id, storageKey }, 201);
+      ok(res, { id }, 201);
     } catch (err) {
       await fs.rm(destination, { force: true });
       throw err;

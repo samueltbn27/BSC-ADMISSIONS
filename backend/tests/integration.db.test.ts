@@ -21,7 +21,9 @@ describe.skipIf(!runDb)('Integrasi Database Nyata (RUN_DB_TESTS=1)', () => {
       .post('/api/v1/auth/register')
       .send({ email, password });
     expect(reg.status).toBe(201);
-    const cookie = reg.headers['set-cookie']?.[0].split(';')[0];
+    const signedIn = await request(app).post('/api/v1/auth/login').send({ email, password });
+    expect(signedIn.status).toBe(200);
+    const cookie = signedIn.headers['set-cookie']?.[0].split(';')[0];
     expect(cookie).toBeTruthy();
 
     const me = await request(app).get('/api/v1/auth/me').set('Cookie', cookie);

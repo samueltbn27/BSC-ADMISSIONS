@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useApplicationId } from '@/hooks/useApplicationId';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload } from 'lucide-react';
@@ -12,10 +13,9 @@ import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/s
 import { DocStatusBadge, StatusBadge } from '@/components/shared/status-badge';
 
 export default function SiswaDokumen() {
-  const [params] = useSearchParams();
-  const appId = params.get('app');
+  const { appId, loading, error } = useApplicationId();
   const queryClient = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const fileRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const [uploadingType, setUploadingType] = useState<number | null>(null);
 
   const application = useQuery({
@@ -44,11 +44,13 @@ export default function SiswaDokumen() {
     onError: (err) => toast.error(err.message),
   });
 
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState />;
   if (!appId) {
     return (
       <div>
         <PageHeader title="Dokumen" description="Pilih pendaftaran untuk mengelola dokumen." />
-        <EmptyState message="Belum ada pendaftaran yang dipilih." />
+        <EmptyState message="Buat draft dari menu Pendaftaran terlebih dahulu." action={<Link to="/siswa/pendaftaran"><Button>Buat Pendaftaran</Button></Link>} />
       </div>
     );
   }
@@ -61,15 +63,22 @@ export default function SiswaDokumen() {
   const types = catalog.data!.document_types;
 
   const handleFile = (typeId: number) => {
-    const file = fileRef.current?.files?.[0];
+    const input = fileRefs.current[typeId];
+    const file = input?.files?.[0];
     if (!file) return;
+    const type = types.find((t) => t.id === typeId)!;
+    if (!type.allowed_mime_types.includes(file.type) || file.size > type.max_size_bytes) {
+      toast.error(`Gunakan ${type.allowed_mime_types.join(', ')} maksimal ${formatBytes(type.max_size_bytes)}.`);
+      if (input) input.value = '';
+      return;
+    }
     setUploadingType(typeId);
     upload.mutate(
       { applicationId: appId!, documentTypeId: typeId, file },
       {
         onSettled: () => {
           setUploadingType(null);
-          if (fileRef.current) fileRef.current.value = '';
+          if (input) input.value = '';
         },
       }
     );
@@ -100,6 +109,7 @@ export default function SiswaDokumen() {
                     <h3 className="font-medium text-slate-900">{type.name}</h3>
                     {doc ? <DocStatusBadge status={doc.verification_status} /> : <span className="text-xs text-slate-400">Belum diunggah</span>}
                   </div>
+                  <p className="mt-1 text-xs text-slate-500">{type.is_required ? 'Wajib' : 'Opsional'} · {type.allowed_mime_types.map((m) => (m.split('/')[1] ?? m).toUpperCase()).join(' / ')} · maks. {formatBytes(type.max_size_bytes)}</p>
                   {doc && (
                     <p className="mt-1 text-xs text-slate-500">
                       {formatBytes(doc.size_bytes)} · revisi {doc.revision} · {formatDate(doc.uploaded_at, true)}
@@ -117,13 +127,14 @@ export default function SiswaDokumen() {
                   {editable && (
                     <>
                       <input
-                        ref={fileRef}
+                        ref={(el) => { fileRefs.current[type.id] = el; }}
+                        aria-label={`Unggah ${type.name}`}
                         type="file"
                         accept={type.allowed_mime_types.join(',')}
                         className="hidden"
                         onChange={() => handleFile(type.id)}
                       />
-                      <Button size="sm" onClick={() => fileRef.current?.click()} loading={uploadingType === type.id}>
+                      <Button size="sm" disabled={upload.isPending} onClick={() => fileRefs.current[type.id]?.click()} loading={uploadingType === type.id}>
                         <Upload className="h-4 w-4" /> {doc ? 'Ganti' : 'Unggah'}
                       </Button>
                     </>

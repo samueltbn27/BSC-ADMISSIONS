@@ -74,6 +74,7 @@ export function DashboardLayout() {
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={() => setMenuOpen(false)}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
@@ -128,6 +129,7 @@ export function DashboardLayout() {
             Lihat situs
           </Link>
         </header>
+        <div className="border-b border-blue-100 bg-blue-50 px-4 py-2 text-xs text-blue-900 lg:px-8">Demo akademik V1 · Data sintetis untuk rekaman UTS</div>
         <main className="flex-1 p-4 lg:p-8">
           <Outlet />
         </main>

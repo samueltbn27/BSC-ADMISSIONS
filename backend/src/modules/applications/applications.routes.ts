@@ -57,10 +57,12 @@ applicationRoutes.get(
   requireAuth,
   requireRole('committee', 'admin'),
   asyncHandler(async (req: AuthedRequest, res) => {
-    const q = typeof req.query.q === 'string' ? req.query.q.trim() : undefined;
-    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
-    const limit = Number(req.query.limit ?? 50);
-    const offset = Number(req.query.offset ?? 0);
+    const { q, status, limit, offset } = z.object({
+      q: z.string().trim().max(150).optional(),
+      status: z.enum(STATUSES).optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50),
+      offset: z.coerce.number().int().min(0).max(100000).default(0),
+    }).parse(req.query);
 
     const [rows, total] = await Promise.all([
       selectFn('list_applicants', [req.user!.id, q ?? null, status ?? null, limit, offset]),

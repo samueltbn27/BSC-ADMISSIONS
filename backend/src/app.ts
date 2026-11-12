@@ -20,9 +20,12 @@ import { publicRoutes } from './modules/public/public.routes.js';
 export const app = express();
 
 app.disable('x-powered-by');
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: { directives: {
+  'upgrade-insecure-requests': env.NODE_ENV === 'production' ? [] : null,
+} } }));
 app.use(cookieParser());
 app.use(express.json({ limit: '100kb' }));
+app.use('/api', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
 
 if (process.env.DEBUG_REQUESTS === '1') {
   let count = 0;

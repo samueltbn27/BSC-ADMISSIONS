@@ -38,8 +38,8 @@ export default function Register() {
       { email: values.email, password: values.password },
       {
         onSuccess: () => {
-          toast.success('Akun berhasil dibuat. Lengkapi biodata Anda untuk mendaftar.');
-          navigate('/siswa/dashboard');
+          toast.success('Akun berhasil dibuat. Silakan masuk dengan email dan kata sandi Anda.');
+          navigate('/login');
         },
         onError: (err) => toast.error(err.message),
       }
@@ -61,17 +61,17 @@ export default function Register() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="nama@email.com" {...register('email')} />
+              <Input id="email" type="email" autoComplete="email" maxLength={254} placeholder="nama@email.com" {...register('email')} />
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
             </div>
             <div>
               <Label htmlFor="password">Kata Sandi</Label>
-              <Input id="password" type="password" placeholder="Minimal 8 karakter" {...register('password')} />
+              <Input id="password" type="password" maxLength={128} autoComplete="new-password" placeholder="Minimal 8 karakter" {...register('password')} />
               {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
             </div>
             <div>
               <Label htmlFor="confirmPassword">Konfirmasi Kata Sandi</Label>
-              <Input id="confirmPassword" type="password" {...register('confirmPassword')} />
+              <Input id="confirmPassword" type="password" maxLength={128} autoComplete="new-password" {...register('confirmPassword')} />
               {errors.confirmPassword && <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>}
             </div>
             <Button type="submit" className="w-full" loading={registerUser.isPending}>

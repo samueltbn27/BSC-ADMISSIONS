@@ -13,7 +13,11 @@ const profileSchema = z.object({
   birthplace: z.preprocess(emptyToNull, z.string().trim().min(1).max(100).nullable()),
   birthDate: z.preprocess(
     emptyToNull,
-    z.coerce.date().refine((d) => d >= new Date('1900-01-01'), 'Tanggal lahir tidak valid').nullable()
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((v) => {
+      const d = new Date(v);
+      return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v &&
+        v >= '1900-01-01' && v <= new Date().toISOString().slice(0, 10);
+    }, 'Tanggal lahir tidak valid').nullable()
   ),
   gender: z.preprocess(emptyToNull, z.enum(['L', 'P']).nullable()),
   address: z.preprocess(emptyToNull, z.string().trim().min(1).max(1000).nullable()),
@@ -41,7 +45,7 @@ profileRoutes.put(
       req.user!.id,
       body.fullName,
       body.birthplace,
-      body.birthDate ? formatDate(body.birthDate) : null,
+      body.birthDate,
       body.gender,
       body.address,
       body.phone,
@@ -50,6 +54,3 @@ profileRoutes.put(
   })
 );
 
-function formatDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}

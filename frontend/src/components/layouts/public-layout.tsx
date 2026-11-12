@@ -7,13 +7,9 @@ import { Button } from '@/components/ui/button';
 
 const NAV = [
   { to: '/', label: 'Beranda', end: true },
-  { to: '/profil-sekolah', label: 'Profil Sekolah' },
   { to: '/jurusan', label: 'Jurusan' },
   { to: '/alur-pendaftaran', label: 'Alur PPDB' },
-  { to: '/jadwal', label: 'Jadwal' },
   { to: '/persyaratan', label: 'Persyaratan' },
-  { to: '/pengumuman', label: 'Pengumuman' },
-  { to: '/faq', label: 'FAQ' },
 ];
 
 export function PublicLayout() {
@@ -22,6 +18,7 @@ export function PublicLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <div className="bg-primary-950 px-4 py-2 text-center text-xs tracking-wide text-blue-100">DEMO AKADEMIK V1 · UTS Manajemen Proyek · Gunakan data dan dokumen sintetis</div>
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2">
@@ -29,8 +26,8 @@ export function PublicLayout() {
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
             <div className="leading-tight">
-              <p className="text-sm font-bold text-primary-900">SMK Bina Sarana Cendekia</p>
-              <p className="text-xs text-slate-500">Penerimaan Murid Baru</p>
+              <p className="text-sm font-bold text-primary-900">BSC Admissions</p>
+              <p className="text-xs text-slate-500">SMK Bina Sarana Cendekia</p>
             </div>
           </Link>
 
@@ -137,7 +134,7 @@ export function PublicLayout() {
                 <p className="text-sm font-bold text-primary-900">SMK Bina Sarana Cendekia</p>
               </div>
               <p className="mt-2 max-w-md text-sm text-slate-500">
-                Sistem Penerimaan Murid Baru (PPDB) online untuk calon siswa baru.
+                Prototype akademik Sistem Penerimaan Murid Baru. Jadwal, data, dan berkas pada demo merupakan contoh sintetis.
               </p>
             </div>
             <div className="flex flex-col gap-2 text-sm text-slate-500">
@@ -148,7 +145,7 @@ export function PublicLayout() {
             </div>
           </div>
           <div className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-400">
-            © {new Date().getFullYear()} SMK Bina Sarana Cendekia. Seluruh hak cipta.
+            © {new Date().getFullYear()} BSC Admissions · Proyek akademik enam mahasiswa · Demo V1
           </div>
         </div>
       </footer>

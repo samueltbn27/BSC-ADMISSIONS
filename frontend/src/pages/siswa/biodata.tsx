@@ -26,9 +26,8 @@ const schema = z.object({
   ),
 });
 
-type FormValues = Omit<z.infer<typeof schema>, 'gender'> & {
-  gender: 'L' | 'P' | '' | null;
-};
+type FormInput = z.input<typeof schema>;
+type FormValues = z.output<typeof schema>;
 
 export default function SiswaBiodata() {
   const queryClient = useQueryClient();
@@ -43,7 +42,7 @@ export default function SiswaBiodata() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormInput, unknown, FormValues>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
     if (profile.data?.profile) {
@@ -87,7 +86,7 @@ export default function SiswaBiodata() {
           <form onSubmit={handleSubmit((values) => save.mutate(values))} className="space-y-4">
             <div>
               <Label htmlFor="fullName">Nama Lengkap</Label>
-              <Input id="fullName" placeholder="Nama sesuai ijazah" {...register('fullName')} />
+              <Input id="fullName" autoComplete="name" maxLength={150} placeholder="Nama sintetis untuk demo" {...register('fullName')} />
               {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -118,12 +117,12 @@ export default function SiswaBiodata() {
             </div>
             <div>
               <Label htmlFor="phone">Nomor Telepon</Label>
-              <Input id="phone" placeholder="+6281234567890" {...register('phone')} />
+              <Input id="phone" type="tel" autoComplete="tel" placeholder="+6280000000000" {...register('phone')} />
               <p className="mt-1 text-xs text-slate-400">Format internasional dimulai dengan +62</p>
               {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
             </div>
             <div className="flex justify-end border-t border-slate-100 pt-4">
-              <Button type="submit" loading={save.isPending}>Simpan Biodata</Button>
+              <Button type="submit" loading={save.isPending}>Simpan Draft Biodata</Button>
             </div>
           </form>
         </CardContent>

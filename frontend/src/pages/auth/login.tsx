@@ -54,12 +54,12 @@ export default function Login() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="nama@email.com" {...register('email')} />
+              <Input id="email" type="email" autoComplete="email" maxLength={254} placeholder="nama@email.com" {...register('email')} />
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
             </div>
             <div>
               <Label htmlFor="password">Kata Sandi</Label>
-              <Input id="password" type="password" {...register('password')} />
+              <Input id="password" type="password" maxLength={128} autoComplete="current-password" {...register('password')} />
               {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
             </div>
             <Button type="submit" className="w-full" loading={login.isPending}>

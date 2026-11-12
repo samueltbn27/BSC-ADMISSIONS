@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
+import multer from 'multer';
 import { DbError } from '../db/call.js';
 import { ApiError } from '../utils/http.js';
 
@@ -28,7 +29,15 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   } else if (err instanceof ZodError) {
     status = 400;
     code = 'VALIDATION_ERROR';
-    message = 'Permintaan tidak valid';
+    message = err.issues.slice(0, 3).map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ');
+  } else if (err instanceof multer.MulterError) {
+    status = 400;
+    code = 'INVALID_UPLOAD';
+    message = 'Berkas terlalu besar atau formulir unggah tidak valid.';
+  } else if (err instanceof SyntaxError || (typeof err === 'object' && err !== null && 'type' in err && err.type === 'entity.too.large')) {
+    status = 400;
+    code = 'INVALID_BODY';
+    message = 'Isi permintaan tidak valid atau terlalu besar.';
   } else if (err instanceof DbError) {
     const mapped = mapDbError(err);
     status = mapped.status;
@@ -37,7 +46,8 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   }
 
   if (status >= 500) {
-    console.error(`[${requestId}] ${req.method} ${req.originalUrl}`, err);
+    // Never log body, cookies, hashes, SQL details, or attacker-controlled query strings.
+    console.error(`[${requestId}] ${req.method} internal-error`);
   }
 
   res.setHeader('X-Request-Id', requestId);

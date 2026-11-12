@@ -5,7 +5,7 @@ import subprocess
 import sys
 import uuid
 
-from database import ROOT, psql
+from database import ROOT, psql, migrations
 
 
 def run(command, env):
@@ -21,6 +21,8 @@ def main():
     env["PGDATABASE"] = test_database
     print("Isolated test database: " + test_database, flush=True)
     os.environ["PGDATABASE"] = test_database
+    # Migration 003 (from backend branch) grants to pre-existing capabilities.
+    psql("DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='bsc_runtime') THEN CREATE ROLE bsc_runtime NOLOGIN; END IF; IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='bsc_authenticator') THEN CREATE ROLE bsc_authenticator NOLOGIN; END IF; END $$;", capture=True)
     owner_env = env.copy()
     owner_env["PGOPTIONS"] = env.get("PGOPTIONS", "") + " -c role=" + test_owner
     command = [sys.executable, "scripts/database.py"]
@@ -37,14 +39,15 @@ def main():
     assertions = [line for line in result.splitlines() if line.startswith("PASS:")]
     print(f"SQL integration assertions: {len(assertions)} passed.", flush=True)
     # Integrity fixture is rolled back, so a complete down/up cycle is safe.
-    run(command + ["rollback", "--allow-destructive"], owner_env)
-    run(command + ["rollback", "--allow-destructive"], owner_env)
+    for _ in migrations():
+        run(command + ["rollback", "--allow-destructive"], owner_env)
     if psql("SELECT to_regnamespace('bsc') IS NULL;", capture=True) != "t":
         raise RuntimeError("Schema rollback failed")
     run(command + ["migrate"], owner_env)
     run(command + ["seed"], owner_env)
     psql((ROOT / "database/bootstrap/privileges.sql").read_text(), capture=True)
-    run(command + ["rollback", "--allow-destructive"], owner_env)
+    for _ in migrations()[1:]:
+        run(command + ["rollback", "--allow-destructive"], owner_env)
     # Prove schema rollback refuses real business rows, retaining both rows/ledger.
     psql("INSERT INTO bsc.admission_periods(name, academic_year, opens_at, closes_at) VALUES ('Rollback guard', '2099/2100', now(), now() + interval '1 day');", capture=True)
     refused = subprocess.run(command + ["rollback", "--allow-destructive"], cwd=ROOT, env=owner_env, capture_output=True)

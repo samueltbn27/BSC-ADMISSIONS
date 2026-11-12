@@ -1,4 +1,5 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useApplicationId } from '@/hooks/useApplicationId';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Clock } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -9,8 +10,7 @@ import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/s
 import { StatusBadge } from '@/components/shared/status-badge';
 
 export default function SiswaStatus() {
-  const [params] = useSearchParams();
-  const appId = params.get('app');
+  const { appId, loading, error } = useApplicationId();
 
   const application = useQuery({
     queryKey: ['applications', appId],
@@ -18,6 +18,8 @@ export default function SiswaStatus() {
     enabled: Boolean(appId),
   });
 
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState />;
   if (!appId) {
     return (
       <div>
