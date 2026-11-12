@@ -28,10 +28,9 @@ if (process.env.DEBUG_REQUESTS === '1') {
   let count = 0;
   app.use((req, _res, next) => {
     count += 1;
-    if (count % 50 === 0) {
-      // eslint-disable-next-line no-console
-      console.log(`[req-debug] ${count} requests so far (last: ${req.method} ${req.path})`);
-    }
+    const ua = String(req.headers['user-agent'] ?? '').slice(0, 80).replace(/\n/g, ' ');
+    // eslint-disable-next-line no-console
+    console.log(`[req-debug] ${count} ${req.method} ${req.path} ua=${ua}`);
     next();
   });
 }
