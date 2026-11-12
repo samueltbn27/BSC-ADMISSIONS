@@ -19,4 +19,4 @@ dist/
 storage/
 
 # Asset lokal Cursor (bukan bagian repository)
-.cursor/skills/
+.cursor/

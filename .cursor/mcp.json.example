@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "postgres": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://USER:PASSWORD@127.0.0.1:5432/bsc_admissions"],
-      "env": {}
-    }
-  }
-}
